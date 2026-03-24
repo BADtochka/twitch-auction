@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
-import { SSEBroadcaster } from './overlay/sse';
+import { WSBroadcaster } from './overlay/ws';
 import { readSettings, readAuctionState } from './settings';
 import { startTwitchGateway, setChatCommand, refundAndNotify, notifyTooLow } from './twitch/gateway';
 import { log } from './logger';
@@ -9,7 +9,7 @@ import { authRoutes } from './routes/auth-callback';
 import { rewardsRoutes } from './routes/rewards';
 import { createOverlayRoutes } from './routes/overlay';
 
-const broadcaster = new SSEBroadcaster();
+const broadcaster = new WSBroadcaster();
 
 const settings = await readSettings();
 const PORT = settings.overlay?.port ?? 3000;
@@ -70,15 +70,15 @@ function handleRustMessage(msg: unknown) {
   const m = msg as Record<string, unknown>;
   switch (m.type) {
     case 'overlay:state': {
-      broadcaster.send('auction_state', m.data);
+      broadcaster.broadcast('auction_state', m.data);
       const cfg = (m.data as Record<string, unknown> | null)?.config as Record<string, unknown> | undefined;
       if (typeof cfg?.chat_command === 'string') setChatCommand(cfg.chat_command);
       break;
     }
-    case 'bid:approved':     broadcaster.send('bid_approved',   m.data); break;
-    case 'bid:rejected':     broadcaster.send('bid_rejected',   m.data); break;
-    case 'timer:tick':       broadcaster.send('timer_tick',     m.data); break;
-    case 'auction:finished': broadcaster.send('auction_finished', m.data); break;
+    case 'bid:approved':     broadcaster.broadcast('bid_approved',   m.data); break;
+    case 'bid:rejected':     broadcaster.broadcast('bid_rejected',   m.data); break;
+    case 'timer:tick':       broadcaster.broadcast('timer_tick',     m.data); break;
+    case 'auction:finished': broadcaster.broadcast('auction_finished', m.data); break;
     case 'bid:too_low': {
       const d = m as Record<string, unknown>;
       const username    = d.username    as string;
