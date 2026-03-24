@@ -4,7 +4,7 @@ const serverDir  = join(import.meta.dir, '..');
 const overlayDir = join(serverDir, 'overlay');
 const transpiler = new Bun.Transpiler({ loader: 'ts' });
 
-const WIDGETS   = ['lot', 'price', 'timer', 'bids', 'top-bid', 'winner'];
+const WIDGETS   = ['lot', 'price', 'timer', 'bids', 'top-bid', 'winner', 'connection'];
 const HTML_NAMES = ['index', ...WIDGETS];
 const CSS_NAMES  = ['shared', 'index', ...WIDGETS];
 const TS_NAMES   = ['shared', 'index', ...WIDGETS];

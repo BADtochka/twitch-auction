@@ -19,6 +19,7 @@ export function createOverlayRoutes(broadcaster: WSBroadcaster) {
     })
     .get('/overlay', () => serveOverlay('index.html'))
     .get('/overlay/', () => serveOverlay('index.html'))
+    .get('/overlay/connection', () => serveOverlay('connection.html'))
     .get('/overlay/*', ({ request }) => {
       const filename = decodeURIComponent(
         new URL(request.url).pathname.slice('/overlay/'.length)
