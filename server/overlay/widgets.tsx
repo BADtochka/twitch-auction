@@ -91,7 +91,7 @@ function BidCard({ username, amount }: { username: string; amount: number }) {
 
 export function BidsWidget() {
   return (
-    <div style={{ ...FONT, width: 560, height: 600, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 32 }}>
+    <div style={{ ...FONT, width: 560, height: 600, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
       <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 24, padding: 0, margin: 0 }}>
         {SAMPLE_BIDS.map(b => <BidCard key={b.id} username={b.username} amount={b.amount} />)}
       </ul>
@@ -99,12 +99,12 @@ export function BidsWidget() {
   );
 }
 
-// ─── Top-bid widget — 460 × 220 ───────────────────────────────────────────────
+// ─── Top-bid widget — 460 × 160 ───────────────────────────────────────────────
 
 export function TopBidWidget() {
   const top = SAMPLE_BIDS[0];
   return (
-    <div style={{ ...FONT, position: 'relative', overflow: 'visible', width: 460, height: 220, background: '#6b3fa0', borderRadius: 18, padding: '30px 34px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
+    <div style={{ ...FONT, position: 'relative', overflow: 'visible', width: 460, height: 160, background: '#6b3fa0', borderRadius: 18, padding: '30px 34px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
       {/* User mini-block — protrudes from top-left by 50% */}
       <div style={{ position: 'absolute', top: 0, left: 24, transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(85,45,130,0.95)', borderRadius: 10, padding: '5px 12px 5px 5px' }}>
         <img src={AVATAR} alt="" style={{ width: 36, height: 36, minWidth: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: 'rgba(255,255,255,0.15)' }} />
@@ -172,7 +172,7 @@ export function FullWidget() {
         </div>
       </div>
       {/* Bids column */}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 22, padding: 0, margin: 0 }}>
           {SAMPLE_BIDS.map(b => <BidCard key={b.id} username={b.username} amount={b.amount} />)}
         </ul>
@@ -226,7 +226,7 @@ export const WIDGET_DIMENSIONS = {
   price:    { w: 460,  h: 180 },
   timer:    { w: 380,  h: 110 },
   bids:     { w: 560,  h: 600, extraPadBottom: 16 },
-  'top-bid':{ w: 460,  h: 220 },
+  'top-bid':{ w: 460,  h: 160 },
   winner:   { w: 560,  h: 130 },
   connection: { w: 220, h: 50  },
 } as const;

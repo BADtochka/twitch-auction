@@ -3,8 +3,7 @@
   transform-origin: center center;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding-bottom: 32px;
+  justify-content: flex-start;
 }
 
 #bid-list {

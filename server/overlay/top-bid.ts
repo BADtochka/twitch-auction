@@ -7,7 +7,7 @@ const unitEl    = document.getElementById('unit')!;
 const avatarEl  = document.getElementById('avatar') as HTMLImageElement;
 const nameEl    = document.getElementById('username')!;
 
-scaleWidget(widget, 460, 220);
+scaleWidget(widget, 460, 160);
 
 // ─── Count-up animation ───────────────────────────────────────────────────────
 

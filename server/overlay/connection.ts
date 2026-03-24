@@ -1,6 +1,8 @@
-import { onConnectionChange, connectWS } from './shared.js';
+import { onConnectionChange, connectWS, scaleWidget } from './shared.js';
 
 const widget  = document.getElementById('widget')!;
+
+scaleWidget(widget, 220, 50);
 const labelEl = document.getElementById('label')!;
 
 onConnectionChange((connected) => {
