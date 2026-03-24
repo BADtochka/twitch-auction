@@ -1,0 +1,37 @@
+{
+  "name": "twitch-auction",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "server"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "bun run typecheck && vite",
+    "build": "bun run typecheck && vite build",
+    "tauri": "tauri",
+    "server:dev": "bun run --cwd server dev",
+    "server:build": "bun run --cwd server build",
+    "server:build:windows": "bun run --cwd server build:windows",
+    "build:windows": "bun run server:build:windows && tauri build --target x86_64-pc-windows-gnu"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-shell": "^2",
+    "lucide-react": "^0.577.0",
+    "react": "^19",
+    "react-dom": "^19",
+    "zustand": "^5"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4",
+    "tailwindcss": "^4",
+    "@tailwindcss/vite": "^4",
+    "typescript": "^5",
+    "vite": "^6"
+  }
+}

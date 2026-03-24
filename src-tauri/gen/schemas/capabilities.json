@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Default capabilities for twitch-auction","local":true,"windows":["main"],"permissions":["core:default","core:event:default","core:event:allow-listen","core:webview:default","shell:allow-open","opener:allow-open-url"]}}

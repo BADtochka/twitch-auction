@@ -1,0 +1,28 @@
+#widget {
+  width: 380px;
+  height: 110px;
+  transform-origin: center center;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 10px;
+}
+
+#timer-icon {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  color: #fff;
+  opacity: 0.9;
+}
+
+#timer-text {
+  font-size: 72px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+#timer-text.warning { color: #ff6b6b; }
+#timer-text.paused  { color: #fbbf24; }

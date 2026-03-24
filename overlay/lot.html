@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lot Widget</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: transparent;
+      color: #fff;
+      width: 340px;
+      padding: 12px;
+    }
+
+    #lot-box {
+      background: rgba(20, 20, 28, 0.92);
+      border: 1px solid rgba(145, 71, 255, 0.4);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: none;
+    }
+    #lot-box.visible { display: block; }
+
+    #lot-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .lot-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #adadb8;
+    }
+
+    #timer {
+      font-size: 13px;
+      font-weight: 600;
+      color: #a970ff;
+    }
+    #timer.warning { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <div id="lot-box">
+    <div id="lot-title">—</div>
+    <div class="lot-meta">
+      <span id="timer">—</span>
+      <span id="leading-label"></span>
+    </div>
+  </div>
+
+  <script>
+    const PORT = location.port || "3000";
+    const es = new EventSource(`http://localhost:${PORT}/overlay/events`);
+
+    let state = null;
+
+    es.addEventListener("auction_state", (e) => {
+      state = JSON.parse(e.data);
+      render();
+    });
+
+    es.addEventListener("timer_tick", (e) => {
+      if (state) {
+        state.timer_left_seconds = JSON.parse(e.data).seconds;
+        renderTimer();
+      }
+    });
+
+    es.addEventListener("auction_finished", () => {
+      document.getElementById("lot-box").classList.remove("visible");
+    });
+
+    function render() {
+      if (!state || state.status === "finished") return;
+      document.getElementById("lot-box").classList.add("visible");
+      document.getElementById("lot-title").textContent = state.config?.lot_title ?? "—";
+      renderTimer();
+    }
+
+    function renderTimer() {
+      if (!state) return;
+      const el = document.getElementById("timer");
+      const secs = state.timer_left_seconds ?? 0;
+      el.textContent = formatTime(secs);
+      el.className = secs <= 30 && secs > 0 ? "warning" : "";
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      return `${m}:${String(sec).padStart(2, "0")}`;
+    }
+  </script>
+</body>
+</html>

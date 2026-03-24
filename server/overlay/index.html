@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auction Overlay</title>
+  <link rel="stylesheet" href="/overlay/shared.css" />
+  <link rel="stylesheet" href="/overlay/index.css" />
+</head>
+<body>
+  <div id="scene" class="hidden">
+
+    <div id="col-lot">
+      <div id="lot-card">
+        <img id="lot-image" src="" alt="" />
+      </div>
+      <p id="lot-title"></p>
+    </div>
+
+    <div id="col-info">
+      <div id="price-card">
+        <span id="price-label">Начальная цена</span>
+        <div id="price-row">
+          <span id="price-amount">—</span>
+          <span id="price-unit"></span>
+        </div>
+      </div>
+      <div id="timer-row">
+        <svg id="timer-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17a1 1 0 001 1h6a1 1 0 001-1v-2.26C17.81 13.47 19 11.38 19 9c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M9 22h6M10 2h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M9 17c0-1.5.67-2 3-2s3 .5 3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span id="timer-text">—</span>
+      </div>
+      <div id="top-bid-card" class="hidden">
+        <div id="top-bid-user-block">
+          <img id="top-bid-avatar" src="" alt="" />
+          <span id="top-bid-username"></span>
+        </div>
+        <span id="top-bid-label">Самая высокая ставка</span>
+        <div id="top-bid-amount-row">
+          <span id="top-bid-amount">—</span>
+          <span id="top-bid-unit"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="col-bids">
+      <ul id="bid-list"></ul>
+      <div id="winner-banner" class="hidden">
+        <span id="winner-banner-label">🏆 Победитель</span>
+        <div id="winner-banner-card">
+          <img id="winner-banner-avatar" alt="" />
+          <span id="winner-banner-username"></span>
+          <span id="winner-banner-amount"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script type="module" src="/overlay/index.js"></script>
+</body>
+</html>

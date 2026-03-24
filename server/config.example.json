@@ -1,0 +1,22 @@
+{
+  "twitch": {
+    "client_id": "",
+    "client_secret": ""
+  },
+  "overlay": {
+    "port": 3000,
+    "theme": "default",
+    "show_timer": true,
+    "top_bids_count": 5,
+    "animation": "slide"
+  },
+  "auction_defaults": {
+    "duration_seconds": 300,
+    "min_bid_step": 100,
+    "unrealistic_multiplier": 3,
+    "snipe_protection_seconds": 30,
+    "chat_command": "!bid",
+    "auto_approve": false,
+    "auto_approve_threshold": 1000
+  }
+}

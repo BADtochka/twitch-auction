@@ -1,0 +1,79 @@
+#widget {
+  position: relative;
+  overflow: visible;
+  width: 460px;
+  height: 220px;
+  transform-origin: center center;
+  background: #6b3fa0;
+  border-radius: 18px;
+  padding: 30px 34px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+/* ── User mini-block — floats out of the top-left corner by 50% ── */
+#user-block {
+  position: absolute;
+  top: 0;
+  left: 24px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(85, 45, 130, 0.95);
+  border-radius: 10px;
+  padding: 5px 12px 5px 5px;
+  backdrop-filter: blur(4px);
+}
+
+#avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#username {
+  font-size: 16px;
+  font-weight: 700;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+  opacity: 0.95;
+}
+
+/* ── Main content ── */
+#label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  opacity: 0.85;
+}
+
+#amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1;
+}
+
+#amount {
+  font-size: 64px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+#unit {
+  font-size: 26px;
+  font-weight: 700;
+  opacity: 0.9;
+}

@@ -1,0 +1,39 @@
+{
+  "productName": "twitch-auction",
+  "version": "0.1.0",
+  "identifier": "dev.twitch-auction",
+  "build": {
+    "beforeDevCommand": "bun run server:build && bun run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "bun run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Twitch Auction",
+        "width": 648,
+        "height": 1200,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/icon.ico", "icons/icon.png", "icons/128x128.png", "icons/256x256.png"],
+    "externalBin": ["binaries/auction-server"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      },
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      }
+    }
+  }
+}

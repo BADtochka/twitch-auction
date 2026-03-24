@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bids Widget</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: transparent;
+      color: #fff;
+      width: 340px;
+      padding: 12px;
+    }
+
+    #bids-box {
+      background: rgba(20, 20, 28, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: none;
+    }
+    #bids-box.visible { display: block; }
+
+    #bids-title {
+      font-size: 11px;
+      color: #adadb8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    #bids-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bid-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      animation: slideIn 0.25s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .bid-rank {
+      width: 18px;
+      text-align: right;
+      color: #52525b;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .bid-rank.first { color: #fbbf24; }
+
+    .bid-username {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bid-amount {
+      font-weight: 700;
+      color: #a970ff;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="bids-box">
+    <div id="bids-title">Топ ставок</div>
+    <div id="bids-list"></div>
+  </div>
+
+  <script>
+    const PORT = location.port || "3000";
+    const es = new EventSource(`http://localhost:${PORT}/overlay/events`);
+
+    let state = null;
+
+    es.addEventListener("auction_state", (e) => {
+      state = JSON.parse(e.data);
+      render();
+    });
+
+    es.addEventListener("auction_finished", () => {
+      document.getElementById("bids-box").classList.remove("visible");
+    });
+
+    function render() {
+      if (!state || state.status === "finished") return;
+
+      const approved = (state.bids ?? [])
+        .filter(b => b.status === "approved" || b.status === "winner")
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5);
+
+      const box = document.getElementById("bids-box");
+      if (approved.length === 0) { box.classList.remove("visible"); return; }
+
+      box.classList.add("visible");
+      document.getElementById("bids-list").innerHTML = approved.map((bid, i) => `
+        <div class="bid-row">
+          <span class="bid-rank ${i === 0 ? 'first' : ''}">#${i + 1}</span>
+          <span class="bid-username">${escHtml(bid.username)}</span>
+          <span class="bid-amount">${bid.amount.toLocaleString("ru-RU")} ${escHtml(state.config?.currency_label ?? "")}</span>
+        </div>
+      `).join("");
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
