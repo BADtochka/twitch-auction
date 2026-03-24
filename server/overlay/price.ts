@@ -1,4 +1,4 @@
-import { connectSSE, scaleWidget, fmt } from './shared.js';
+import { connectWS, scaleWidget, fmt } from './shared.js';
 import type { AuctionState } from './shared.js';
 
 const widget    = document.getElementById('widget')!;
@@ -9,7 +9,7 @@ scaleWidget(widget, 460, 180);
 
 let keepAfterFinished = false;
 
-connectSSE(
+connectWS(
   (state: AuctionState) => {
     keepAfterFinished = state.config.widgets_show_after_finished?.includes('price') ?? false;
     if (state.status === 'idle' || (state.status === 'finished' && !keepAfterFinished)) { widget.classList.add('hidden'); return; }

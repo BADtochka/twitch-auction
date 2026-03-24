@@ -1,4 +1,4 @@
-import { connectSSE, fmt, fmtTime, AVATAR_PLACEHOLDER } from './shared.js';
+import { connectWS, fmt, fmtTime, AVATAR_PLACEHOLDER } from './shared.js';
 import type { AuctionState, Bid } from './shared.js';
 
 // ── Scale scene to fill viewport ─────────────────────────────
@@ -189,7 +189,7 @@ function renderState(state: AuctionState) {
   renderTopBid(state);
 }
 
-connectSSE(
+connectWS(
   renderState,
   (secs, status) => {
     if (!currentState) return;

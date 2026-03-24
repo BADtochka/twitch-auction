@@ -1,4 +1,4 @@
-import { connectSSE, scaleWidget, fmt, AVATAR_PLACEHOLDER } from './shared.js';
+import { connectWS, scaleWidget, fmt, AVATAR_PLACEHOLDER } from './shared.js';
 import type { AuctionState } from './shared.js';
 
 const widget    = document.getElementById('widget')!;
@@ -21,7 +21,7 @@ function show(username: string, amount: number, avatarUrl?: string) {
 
 let keepAfterFinished = false;
 
-connectSSE(
+connectWS(
   (state: AuctionState) => {
     currencyLabel      = state.config.currency_label;
     keepAfterFinished  = state.config.widgets_show_after_finished?.includes('winner') ?? false;

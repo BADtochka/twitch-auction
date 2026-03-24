@@ -1,4 +1,4 @@
-import { connectSSE, scaleWidget, fmt, AVATAR_PLACEHOLDER } from './shared.js';
+import { connectWS, scaleWidget, fmt, AVATAR_PLACEHOLDER } from './shared.js';
 import type { AuctionState, Bid } from './shared.js';
 
 const widget    = document.getElementById('widget')!;
@@ -62,7 +62,7 @@ function renderBids(state: AuctionState) {
 
 let keepAfterFinished = false;
 
-connectSSE(
+connectWS(
   (state: AuctionState) => {
     keepAfterFinished = state.config.widgets_show_after_finished?.includes('bids') ?? false;
     if (state.status === 'idle' || (state.status === 'finished' && !keepAfterFinished)) { widget.classList.add('hidden'); return; }

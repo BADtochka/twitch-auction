@@ -1,4 +1,4 @@
-import { connectSSE, scaleWidget, fmtTime } from './shared.js';
+import { connectWS, scaleWidget, fmtTime } from './shared.js';
 import type { AuctionState } from './shared.js';
 
 const widget  = document.getElementById('widget')!;
@@ -16,7 +16,7 @@ function renderTimer(secs: number, status: string) {
 
 let keepAfterFinished = false;
 
-connectSSE(
+connectWS(
   (state: AuctionState) => {
     currentState = state;
     keepAfterFinished = state.config.widgets_show_after_finished?.includes('timer') ?? false;

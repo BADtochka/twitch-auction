@@ -51,31 +51,106 @@ export type StateHandler    = (state: AuctionState) => void;
 export type TickHandler     = (secs: number, status: string) => void;
 export type FinishedHandler = (winner: { username: string | null; amount: number | null } | null) => void;
 
-export function connectSSE(
-  onState:    StateHandler,
-  onTick?:    TickHandler,
+// ─── Connection state ─────────────────────────────────────────────────────────
+
+type ConnectionListener = (connected: boolean) => void;
+const connectionListeners = new Set<ConnectionListener>();
+
+function notifyConnection(connected: boolean) {
+  for (const cb of connectionListeners) cb(connected);
+}
+
+/**
+ * Subscribe to WebSocket connect/disconnect events.
+ * Listeners are module-level and persist across reconnects.
+ * Returns an unsubscribe function.
+ */
+export function onConnectionChange(cb: ConnectionListener): () => void {
+  connectionListeners.add(cb);
+  return () => connectionListeners.delete(cb);
+}
+
+// ─── WebSocket connection ─────────────────────────────────────────────────────
+
+/**
+ * Opens a WebSocket connection to /overlay/events with automatic
+ * exponential-backoff reconnection (1s → 2s → 4s → … → 30s).
+ *
+ * Drop-in replacement for the old connectSSE — same callback signature.
+ * bid_approved and bid_rejected messages are intentionally ignored;
+ * widgets rely on full auction_state snapshots.
+ *
+ * Returns { close() } for explicit teardown (currently unused by widgets).
+ */
+export function connectWS(
+  onState: StateHandler,
+  onTick?: TickHandler,
   onFinished?: FinishedHandler
-): EventSource {
+): { close(): void } {
+  let ws: WebSocket | null = null;
+  let delay = 1000;
+  let stopped = false;
   let currentStatus = 'idle';
-  const es = new EventSource('/overlay/events');
 
-  es.addEventListener('auction_state', ((e: MessageEvent) => {
-    const state = JSON.parse(e.data) as AuctionState;
-    currentStatus = state.status;
-    onState(state);
-  }) as EventListener);
+  function connect() {
+    if (stopped) return;
+    // EventSource accepts relative URLs, but WebSocket requires an absolute ws:// URL.
+    ws = new WebSocket(`ws://${location.host}/overlay/events`);
 
-  es.addEventListener('timer_tick', ((e: MessageEvent) => {
-    const { seconds_left } = JSON.parse(e.data) as { seconds_left: number };
-    onTick?.(seconds_left, currentStatus);
-  }) as EventListener);
+    ws.onopen = () => {
+      delay = 1000;
+      notifyConnection(true);
+    };
 
-  es.addEventListener('auction_finished', ((e: MessageEvent) => {
-    const winner = JSON.parse(e.data) as { username: string | null; amount: number | null } | null;
-    currentStatus = 'finished';
-    onFinished?.(winner);
-  }) as EventListener);
+    ws.onmessage = (e) => {
+      let msg: { type: string; data: unknown };
+      try {
+        msg = JSON.parse(e.data as string) as { type: string; data: unknown };
+      } catch {
+        return;
+      }
+      switch (msg.type) {
+        case 'auction_state': {
+          const state = msg.data as AuctionState;
+          currentStatus = state.status;
+          onState(state);
+          break;
+        }
+        case 'timer_tick': {
+          const { seconds_left } = msg.data as { seconds_left: number };
+          onTick?.(seconds_left, currentStatus);
+          break;
+        }
+        case 'auction_finished': {
+          const winner = msg.data as { username: string | null; amount: number | null } | null;
+          currentStatus = 'finished';
+          onFinished?.(winner);
+          break;
+        }
+        // bid_approved, bid_rejected — intentionally ignored
+      }
+    };
 
-  es.onerror = () => console.warn('[overlay] SSE reconnecting...');
-  return es;
+    ws.onerror = () => {
+      console.warn('[overlay] WS error, reconnecting...');
+      // onclose fires after onerror — reconnect logic lives there
+    };
+
+    ws.onclose = () => {
+      notifyConnection(false);
+      if (!stopped) {
+        setTimeout(connect, delay);
+        delay = Math.min(delay * 2, 30_000);
+      }
+    };
+  }
+
+  connect();
+
+  return {
+    close() {
+      stopped = true;
+      ws?.close();
+    },
+  };
 }
