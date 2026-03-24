@@ -1,4 +1,5 @@
 use base64::Engine as _;
+#[cfg(debug_assertions)]
 use std::process::Command;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tokio::time::{sleep, Duration};
@@ -197,8 +198,17 @@ pub async fn approve_bid(
         .ok_or("Bid not found")?;
     bid.status = BidStatus::Approved;
     bid.is_flagged = false;
+    let notify_msg = serde_json::json!({
+        "type": "bid:approved",
+        "username": bid.username,
+        "amount": bid.amount,
+        "source": bid.source,
+        "redemption_id": bid.redemption_id,
+    });
     app.emit("bid:updated", bid.clone()).ok();
     push_overlay_state(&app, &data);
+    drop(data);
+    write_to_server(&app, &notify_msg.to_string());
     Ok(())
 }
 
@@ -209,14 +219,29 @@ pub async fn reject_bid(
     state: State<'_, AuctionState>,
 ) -> Result<(), String> {
     let mut data = state.0.lock().map_err(|e| e.to_string())?;
+    let reward_id = data.config.reward_id.clone();
     let bid = data
         .bids
         .iter_mut()
         .find(|b| b.id == bid_id)
         .ok_or("Bid not found")?;
     bid.status = BidStatus::Rejected;
+    let bid_username = bid.username.clone();
+    let bid_amount = bid.amount;
+    let bid_source = bid.source.clone();
+    let bid_redemption_id = bid.redemption_id.clone();
     app.emit("bid:updated", bid.clone()).ok();
     push_overlay_state(&app, &data);
+    drop(data);
+    let notify_msg = serde_json::json!({
+        "type": "bid:rejected",
+        "username": bid_username,
+        "amount": bid_amount,
+        "source": bid_source,
+        "redemption_id": bid_redemption_id,
+        "reward_id": reward_id,
+    });
+    write_to_server(&app, &notify_msg.to_string());
     Ok(())
 }
 

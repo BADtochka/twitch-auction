@@ -56,7 +56,22 @@ export type FinishedHandler = (winner: { username: string | null; amount: number
 type ConnectionListener = (connected: boolean) => void;
 const connectionListeners = new Set<ConnectionListener>();
 
+let stylesInjected = false;
+
+function injectDisconnectStyles() {
+  if (stylesInjected) return;
+  stylesInjected = true;
+  const style = document.createElement('style');
+  style.textContent = `
+    #widget, #scene { transition: opacity 0.4s ease, filter 0.4s ease; }
+    body.ws-offline #widget:not(.keep-visible), body.ws-offline #scene { opacity: 0; filter: blur(4px); pointer-events: none; }
+    body.ws-offline #widget.keep-visible { opacity: 1 !important; filter: none !important; pointer-events: auto !important; }
+  `;
+  document.head.appendChild(style);
+}
+
 function notifyConnection(connected: boolean) {
+  document.body.classList.toggle('ws-offline', !connected);
   for (const cb of connectionListeners) cb(connected);
 }
 
@@ -91,6 +106,8 @@ export function connectWS(
   let delay = 1000;
   let stopped = false;
   let currentStatus = 'idle';
+
+  injectDisconnectStyles();
 
   function connect() {
     if (stopped) return;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Check, CheckCircle, Trophy, X, XCircle, Clock } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle, RotateCcw, Trophy, X, XCircle, Clock } from "lucide-react";
 import { useAuctionStore, type Bid } from "../../store/auctionStore";
 import { useAuction } from "../../hooks/useAuction";
 
@@ -93,20 +93,30 @@ function BidRow({
       <span className="font-bold tabular-nums">
         {bid.amount.toLocaleString("ru-RU")} {currencyLabel}
       </span>
-      {bid.status === "pending" && (
+      {bid.status !== "winner" && (
         <div className="flex gap-1">
-          <button
-            onClick={onApprove}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-green-700 hover:bg-green-600"
-          >
-            <Check size={11} /> Одобрить
-          </button>
-          <button
-            onClick={onReject}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-red-800 hover:bg-red-700"
-          >
-            <X size={11} /> Откл
-          </button>
+          {(bid.status === "pending" || bid.status === "rejected") && (
+            <button
+              onClick={onApprove}
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs ${
+                bid.status === "rejected"
+                  ? "bg-zinc-600 hover:bg-zinc-500"
+                  : "bg-green-700 hover:bg-green-600"
+              }`}
+            >
+              {bid.status === "rejected"
+                ? <><RotateCcw size={11} /> Вернуть</>
+                : <><Check size={11} /> Одобрить</>}
+            </button>
+          )}
+          {(bid.status === "pending" || bid.status === "approved") && (
+            <button
+              onClick={onReject}
+              className="flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-red-800 hover:bg-red-700"
+            >
+              <X size={11} /> Откл
+            </button>
+          )}
         </div>
       )}
     </li>

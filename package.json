@@ -1,7 +1,7 @@
 {
   "name": "twitch-auction",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.3",
   "type": "module",
   "workspaces": [
     "server"
@@ -14,7 +14,9 @@
     "server:dev": "bun run --cwd server dev",
     "server:build": "bun run --cwd server build",
     "server:build:windows": "bun run --cwd server build:windows",
-    "build:windows": "bun run server:build:windows && tauri build --target x86_64-pc-windows-gnu"
+    "sync-version": "bun scripts/sync-version.ts",
+    "bump": "bun scripts/bump-version.ts",
+    "build:windows": "bun run sync-version && bun run server:build:windows && tauri build --target x86_64-pc-windows-gnu"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

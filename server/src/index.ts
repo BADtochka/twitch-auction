@@ -2,7 +2,7 @@ import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { WSBroadcaster } from './overlay/ws';
 import { readSettings, readAuctionState } from './settings';
-import { startTwitchGateway, setChatCommand, refundAndNotify, notifyTooLow } from './twitch/gateway';
+import { startTwitchGateway, setChatCommand, refundAndNotify, notifyTooLow, notifyRejected, notifyWinner } from './twitch/gateway';
 import { log } from './logger';
 import { healthRoutes } from './routes/health';
 import { authRoutes } from './routes/auth-callback';
@@ -75,16 +75,40 @@ function handleRustMessage(msg: unknown) {
       if (typeof cfg?.chat_command === 'string') setChatCommand(cfg.chat_command);
       break;
     }
-    case 'bid:approved':     broadcaster.broadcast('bid_approved',   m.data); break;
-    case 'bid:rejected':     broadcaster.broadcast('bid_rejected',   m.data); break;
+    case 'bid:approved': {
+      broadcaster.broadcast('bid_approved', m.data);
+      const d = m as Record<string, unknown>;
+      log('info', `[bid] Approved: ${d.username} (${d.amount})`);
+      break;
+    }
+    case 'bid:rejected': {
+      broadcaster.broadcast('bid_rejected', m.data);
+      const d = m as Record<string, unknown>;
+      const username     = d.username      as string;
+      const amount       = d.amount        as number;
+      const redemptionId = d.redemption_id as string | undefined;
+      const rewardId     = d.reward_id     as string | undefined;
+      log('info', `[bid] Rejected: ${username} (${amount})`);
+      notifyRejected(username, amount, redemptionId || undefined, rewardId || undefined).catch(() => {});
+      break;
+    }
     case 'timer:tick':       broadcaster.broadcast('timer_tick',     m.data); break;
-    case 'auction:finished': broadcaster.broadcast('auction_finished', m.data); break;
+    case 'auction:finished': {
+      broadcaster.broadcast('auction_finished', m.data);
+      const d = m.data as Record<string, unknown> | null;
+      if (d?.username && d?.amount) {
+        log('info', `[auction] Finished — winner: ${d.username} (${d.amount})`);
+        notifyWinner(d.username as string, d.amount as number).catch(() => {});
+      }
+      break;
+    }
     case 'bid:too_low': {
       const d = m as Record<string, unknown>;
       const username    = d.username    as string;
       const minRequired = d.min_required as number;
       const redemptionId = d.redemption_id as string | undefined;
       const rewardId     = d.reward_id    as string | undefined;
+      log('info', `[bid] Too low: ${username} (${d.amount}), min required: ${minRequired}`);
       if (redemptionId && rewardId) {
         refundAndNotify(redemptionId, rewardId, username, minRequired).catch(() => {});
       } else {

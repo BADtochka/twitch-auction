@@ -292,6 +292,22 @@ body {
   }
 }
 
+@keyframes slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+.bid-card.removing {
+  animation: slide-out 0.22s ease forwards;
+  pointer-events: none;
+}
+
 /* ── Winner banner (shown in col-bids when finished) ── */
 #winner-banner {
   display: flex;

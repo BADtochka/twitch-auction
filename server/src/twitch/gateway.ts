@@ -20,7 +20,11 @@ export async function refundAndNotify(
 ): Promise<void> {
   if (!_apiClient || !_channelId) return;
   const { refundRedemption } = await import("./refund");
-  await refundRedemption(_apiClient, _channelId, rewardId, redemptionId);
+  try {
+    await refundRedemption(_apiClient, _channelId, rewardId, redemptionId);
+  } catch (err) {
+    log('warn', `[gateway] Failed to refund redemption ${redemptionId}: ${err instanceof Error ? err.message : err}`);
+  }
   await notifyTooLow(username, minRequired);
 }
 
@@ -32,7 +36,44 @@ export async function notifyTooLow(username: string, minRequired: number): Promi
       `@${username}, ставка отклонена — минимальная ставка: ${minRequired.toLocaleString("ru-RU")}`
     );
   } catch (err) {
-    console.error("[gateway] Failed to send chat notification", err);
+    log('warn', `[gateway] Failed to send chat notification: ${err instanceof Error ? err.message : err}`);
+  }
+}
+
+export async function notifyRejected(
+  username: string,
+  amount: number,
+  redemptionId?: string,
+  rewardId?: string,
+): Promise<void> {
+  if (!_apiClient || !_channelId) return;
+  if (redemptionId && rewardId) {
+    const { refundRedemption } = await import("./refund");
+    try {
+      await refundRedemption(_apiClient, _channelId, rewardId, redemptionId);
+    } catch (err) {
+      log('warn', `[gateway] Failed to refund redemption ${redemptionId}: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+  try {
+    await _apiClient.chat.sendChatMessage(
+      _channelId,
+      `@${username}, ставка ${amount.toLocaleString("ru-RU")} отклонена`
+    );
+  } catch (err) {
+    log('warn', `[gateway] Failed to send rejection notification: ${err instanceof Error ? err.message : err}`);
+  }
+}
+
+export async function notifyWinner(username: string, amount: number): Promise<void> {
+  if (!_apiClient || !_channelId) return;
+  try {
+    await _apiClient.chat.sendChatMessage(
+      _channelId,
+      `@${username} побеждает со ставкой ${amount.toLocaleString("ru-RU")}! Поздравляем!`
+    );
+  } catch (err) {
+    log('warn', `[gateway] Failed to send winner notification: ${err instanceof Error ? err.message : err}`);
   }
 }
 
@@ -127,7 +168,7 @@ export async function startTwitchGateway(): Promise<EventSubWsListener | undefin
     const text = event.messageText.trim();
     log('info', `[gateway] Chat message: ${event.chatterDisplayName}: ${text}`);
     if (!text.startsWith(currentChatCommand + " ")) return;
-    const raw = text.slice(currentChatCommand.length).trim();
+    const raw = text.slice(currentChatCommand.length).trim().replace(/[.,]/g, '');
     const amount = parseInt(raw, 10);
     if (isNaN(amount) || amount <= 0) return;
     const avatar_url = await fetchAvatar(apiClient, event.chatterId);

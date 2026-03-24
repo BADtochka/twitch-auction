@@ -1,6 +1,6 @@
 #widget {
   width: 560px;
-  transform-origin: center center;
+  transform-origin: top center;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -70,4 +70,20 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+@keyframes slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+.bid-card.removing {
+  animation: slide-out 0.22s ease forwards;
+  pointer-events: none;
 }
