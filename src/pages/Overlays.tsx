@@ -10,6 +10,7 @@ import {
   TopBidWidget,
   WinnerWidget,
   FullWidget,
+  ConnectionWidget,
   WIDGET_DIMENSIONS,
   type WidgetId,
 } from '../../server/overlay/widgets';
@@ -25,16 +26,18 @@ const WIDGETS = [
   { id: 'bids'     as WidgetId, name: 'Ставки',  description: 'Топ ставок',              url: `${BASE}/overlay/bids`       },
   { id: 'top-bid'  as WidgetId, name: 'Лидер',    description: 'Лучшая ставка',           url: `${BASE}/overlay/top-bid`    },
   { id: 'winner'   as WidgetId, name: 'Победитель', description: 'Итоговый победитель',    url: `${BASE}/overlay/winner`     },
+  { id: 'connection' as WidgetId, name: 'Подключение', description: 'Статус соединения', url: `${BASE}/overlay/connection` },
 ];
 
 const WIDGET_COMPONENTS: Record<WidgetId, React.ReactNode> = {
-  overlay:   <FullWidget />,
-  lot:       <LotWidget />,
-  price:     <PriceWidget />,
-  timer:     <TimerWidget />,
-  bids:      <BidsWidget />,
-  'top-bid': <TopBidWidget />,
-  winner:    <WinnerWidget />,
+  overlay:    <FullWidget />,
+  lot:        <LotWidget />,
+  price:      <PriceWidget />,
+  timer:      <TimerWidget />,
+  bids:       <BidsWidget />,
+  'top-bid':  <TopBidWidget />,
+  winner:     <WinnerWidget />,
+  connection: <ConnectionWidget />,
 };
 
 // ─── Scaled preview ───────────────────────────────────────────────────────────
@@ -63,9 +66,10 @@ interface WidgetCardProps {
   widget: typeof WIDGETS[number];
   showAfterFinished: boolean;
   onToggleShowAfter: (checked: boolean) => void;
+  showToggle?: boolean;
 }
 
-function WidgetCard({ widget, showAfterFinished, onToggleShowAfter }: WidgetCardProps) {
+function WidgetCard({ widget, showAfterFinished, onToggleShowAfter, showToggle = true }: WidgetCardProps) {
   const [copied, setCopied] = useState(false);
 
   const open = () => invoke('open_url', { url: widget.url });
@@ -110,21 +114,23 @@ function WidgetCard({ widget, showAfterFinished, onToggleShowAfter }: WidgetCard
       </div>
 
       {/* Show-after-finished toggle */}
-      <div
-        className="flex items-center gap-2 cursor-pointer select-none group"
-        role="switch"
-        aria-checked={showAfterFinished}
-        tabIndex={0}
-        onClick={() => onToggleShowAfter(!showAfterFinished)}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleShowAfter(!showAfterFinished); } }}
-      >
-        <div className={`w-7 h-4 rounded-full transition-colors flex-shrink-0 flex items-center px-0.5 ${showAfterFinished ? 'bg-purple-600' : 'bg-zinc-700'}`}>
-          <div className={`w-3 h-3 rounded-full bg-white shadow transition-transform ${showAfterFinished ? 'translate-x-3' : 'translate-x-0'}`} />
+      {showToggle && (
+        <div
+          className="flex items-center gap-2 cursor-pointer select-none group"
+          role="switch"
+          aria-checked={showAfterFinished}
+          tabIndex={0}
+          onClick={() => onToggleShowAfter(!showAfterFinished)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggleShowAfter(!showAfterFinished); } }}
+        >
+          <div className={`w-7 h-4 rounded-full transition-colors flex-shrink-0 flex items-center px-0.5 ${showAfterFinished ? 'bg-purple-600' : 'bg-zinc-700'}`}>
+            <div className={`w-3 h-3 rounded-full bg-white shadow transition-transform ${showAfterFinished ? 'translate-x-3' : 'translate-x-0'}`} />
+          </div>
+          <span className="text-[11px] text-zinc-500 group-hover:text-zinc-400 transition-colors leading-none">
+            Показывать после окончания
+          </span>
         </div>
-        <span className="text-[11px] text-zinc-500 group-hover:text-zinc-400 transition-colors leading-none">
-          Показывать после окончания
-        </span>
-      </div>
+      )}
 
       {/* URL */}
       <div className="text-[10px] text-zinc-600 font-mono truncate leading-none">{widget.url}</div>
@@ -172,6 +178,7 @@ export default function Overlays({ onBack }: Props) {
             widget={w}
             showAfterFinished={showAfterIds.includes(w.id)}
             onToggleShowAfter={(checked) => toggle(w.id, checked)}
+            showToggle={w.id !== 'connection'}
           />
         ))}
       </div>
