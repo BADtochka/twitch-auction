@@ -204,6 +204,20 @@ export function WinnerWidget() {
   );
 }
 
+// ─── Connection widget — 220 × 50 ────────────────────────────────────────────
+
+export function ConnectionWidget() {
+  return (
+    <div style={{ ...FONT, width: 220, height: 50, background: 'rgba(20,20,20,0.85)',
+                  borderRadius: 10, display: 'flex', alignItems: 'center',
+                  gap: 10, padding: '0 16px' }}>
+      <span style={{ width: 10, height: 10, borderRadius: '50%',
+                     background: '#22c55e', flexShrink: 0 }} />
+      <span style={{ fontSize: 14, fontWeight: 600 }}>Подключено</span>
+    </div>
+  );
+}
+
 // ─── Re-export natural dimensions for each widget ─────────────────────────────
 
 export const WIDGET_DIMENSIONS = {
@@ -214,6 +228,7 @@ export const WIDGET_DIMENSIONS = {
   bids:     { w: 560,  h: 600, extraPadBottom: 16 },
   'top-bid':{ w: 460,  h: 220 },
   winner:   { w: 560,  h: 130 },
+  connection: { w: 220, h: 50  },
 } as const;
 
 export type WidgetId = keyof typeof WIDGET_DIMENSIONS;
