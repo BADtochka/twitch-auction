@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { ArrowLeft, Check, Copy, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+import { env } from '../env';
 import { useAuctionStore } from '../store/auctionStore';
 import {
   LotWidget,
@@ -15,7 +16,7 @@ import {
   type WidgetId,
 } from '../../server/overlay/widgets';
 
-const SERVER_PORT = import.meta.env.VITE_SERVER_PORT ?? "3000";
+const SERVER_PORT = env.VITE_SERVER_PORT;
 const BASE = `http://localhost:${SERVER_PORT}`;
 
 const WIDGETS = [

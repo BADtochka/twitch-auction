@@ -1,9 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
-import { type AuctionConfig, type Bid } from "../store/auctionStore";
+import { type AuctionConfig, type AuctionData, type Bid } from "../store/auctionStore";
 
 export function useAuction() {
   const startAuction = (config: AuctionConfig) =>
-    invoke("start_auction", { config });
+    invoke<AuctionData>("start_auction", { config });
 
   const pauseAuction = () => invoke("pause_auction");
 

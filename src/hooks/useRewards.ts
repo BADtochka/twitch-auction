@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { env } from '../env';
 
-const SERVER_PORT = import.meta.env.VITE_SERVER_PORT ?? '3000';
+const SERVER_PORT = env.VITE_SERVER_PORT;
 const REWARDS_URL = `http://localhost:${SERVER_PORT}/api/rewards`;
 
 export interface Reward {

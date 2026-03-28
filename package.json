@@ -1,7 +1,7 @@
 {
   "name": "twitch-auction",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.1.0",
   "type": "module",
   "workspaces": [
     "server"
@@ -19,11 +19,13 @@
     "build:windows": "bun run sync-version && bun run server:build:windows && tauri build --target x86_64-pc-windows-gnu"
   },
   "dependencies": {
+    "@t3-oss/env-core": "^0.13.11",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-shell": "^2",
     "lucide-react": "^0.577.0",
     "react": "^19",
     "react-dom": "^19",
+    "zod": "^4.3.6",
     "zustand": "^5"
   },
   "devDependencies": {

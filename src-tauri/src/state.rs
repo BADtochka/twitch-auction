@@ -183,7 +183,7 @@ impl AuctionData {
 #[derive(Default)]
 pub struct AuctionState(pub Mutex<AuctionData>);
 
-fn chrono_now() -> String {
+pub fn chrono_now() -> String {
     // Simple ISO 8601 timestamp — swap for chrono if added as dep
     use std::time::{SystemTime, UNIX_EPOCH};
     let secs = SystemTime::now()

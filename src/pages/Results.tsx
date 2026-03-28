@@ -1,9 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Check, Copy, ExternalLink, RotateCcw, Trophy } from "lucide-react";
 import { useState } from "react";
+import { env } from "../env";
 import { useAuctionStore } from "../store/auctionStore";
 
-const SERVER_PORT = import.meta.env.VITE_SERVER_PORT ?? "3000";
+const SERVER_PORT = env.VITE_SERVER_PORT;
 const WINNER_URL = `http://localhost:${SERVER_PORT}/overlay/winner`;
 
 export default function Results() {

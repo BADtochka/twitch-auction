@@ -1,9 +1,10 @@
 import { RefreshCw } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { env } from '../env';
 import { useServerLogs } from '../hooks/useServerLogs';
 import { useServerStatus } from '../hooks/useServerStatus';
 
-const SERVER_PORT = import.meta.env.VITE_SERVER_PORT ?? '3000';
+const SERVER_PORT = env.VITE_SERVER_PORT;
 
 function formatUptime(seconds: number): string {
   const h = Math.floor(seconds / 3600);

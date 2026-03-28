@@ -7,3 +7,5 @@ src-tauri/binaries/auction-server*
 server/node_modules/
 settings.json
 server/config.json
+server/src/credentials.json
+

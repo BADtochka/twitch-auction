@@ -27,7 +27,11 @@ export default function App() {
     invoke<AuctionData>("get_auction_state").then(store.setAuction).catch(console.error);
 
     const unlisteners = [
-      listen<Bid>("bid:new", (e) => store.addBid(e.payload)),
+      listen<{ auction_id: string; bid: Bid }>("bid:new", (e) => {
+        if (useAuctionStore.getState().auction?.id === e.payload.auction_id) {
+          store.addBid(e.payload.bid);
+        }
+      }),
       listen<Bid>("bid:updated", (e) => store.updateBid(e.payload)),
       listen<{ seconds_left: number }>("timer:tick", (e) =>
         store.setTimerLeft(e.payload.seconds_left)

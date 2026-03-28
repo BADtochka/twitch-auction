@@ -1,9 +1,11 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import staticConfig from '../config.json';
+import { env } from './env';
 
 // Dynamic state written at runtime (after OAuth)
 interface DynamicState {
+  client_id?: string;
+  client_secret?: string;
   channel_login?: string;
   channel_id?: string;
   tokens?: {
@@ -76,19 +78,35 @@ export async function readSettings(): Promise<Settings> {
   const state = await readState();
   return {
     twitch: {
-      client_id: staticConfig.twitch.client_id,
-      client_secret: staticConfig.twitch.client_secret,
+      client_id: state.client_id || env.TWITCH_CLIENT_ID,
+      client_secret: state.client_secret || env.TWITCH_CLIENT_SECRET,
       channel_login: state.channel_login ?? '',
       channel_id: state.channel_id ?? '',
     },
     tokens: state.tokens,
-    overlay: staticConfig.overlay,
-    auction_defaults: staticConfig.auction_defaults,
+    overlay: {
+      port: env.PORT,
+      theme: env.OVERLAY_THEME,
+      show_timer: env.OVERLAY_SHOW_TIMER,
+      top_bids_count: env.OVERLAY_TOP_BIDS_COUNT,
+      animation: env.OVERLAY_ANIMATION,
+    },
+    auction_defaults: {
+      duration_seconds: env.AUCTION_DURATION_SECONDS,
+      min_bid_step: env.AUCTION_MIN_BID_STEP,
+      unrealistic_multiplier: env.AUCTION_UNREALISTIC_MULTIPLIER,
+      snipe_protection_seconds: env.AUCTION_SNIPE_PROTECTION_SECONDS,
+      chat_command: env.AUCTION_CHAT_COMMAND,
+      auto_approve: env.AUCTION_AUTO_APPROVE,
+      auto_approve_threshold: env.AUCTION_AUTO_APPROVE_THRESHOLD,
+    },
   };
 }
 
 export async function writeSettings(settings: Settings): Promise<void> {
   await writeState({
+    client_id: settings.twitch?.client_id,
+    client_secret: settings.twitch?.client_secret,
     channel_login: settings.twitch?.channel_login,
     channel_id: settings.twitch?.channel_id,
     tokens: settings.tokens,

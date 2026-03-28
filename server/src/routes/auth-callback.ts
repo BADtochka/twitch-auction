@@ -48,12 +48,14 @@ export const authRoutes = new Elysia()
   .get('/auth/status', async () => {
     const settings = await readSettings();
     const token = settings.tokens?.access_token;
-    if (!token) return { authed: false, channel_login: null, scope_warning: false };
+    const client_id = settings.twitch?.client_id ?? '';
+    if (!token) return { authed: false, channel_login: null, scope_warning: false, client_id };
     const missing = await checkTokenScopes(token);
     return {
       authed: true,
       channel_login: settings.twitch?.channel_login ?? null,
       scope_warning: missing.length > 0,
+      client_id,
     };
   })
   .get('/auth/callback', async ({ query, set }) => {

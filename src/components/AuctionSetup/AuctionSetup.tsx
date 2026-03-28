@@ -3,7 +3,7 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuction } from "../../hooks/useAuction";
 import { useRewards } from "../../hooks/useRewards";
-import type { AuctionConfig } from "../../store/auctionStore";
+import { useAuctionStore, type AuctionConfig } from "../../store/auctionStore";
 
 const defaults: AuctionConfig = {
   lot_title: "",
@@ -110,6 +110,7 @@ interface Props {
 
 export default function AuctionSetup({ authed }: Props) {
   const { startAuction } = useAuction();
+  const setAuction = useAuctionStore((s) => s.setAuction);
   const [config, setConfig] = useState<AuctionConfig>(loadConfig);
   const { rewards, loading: rewardsLoading, available: channelPointsAvailable, refresh: refreshRewards } = useRewards(authed);
   const [error, setError] = useState("");
@@ -138,7 +139,8 @@ export default function AuctionSetup({ authed }: Props) {
     setError("");
     if (!config.lot_title.trim()) return setError("Введите название лота");
     try {
-      await startAuction(config);
+      const data = await startAuction(config);
+      setAuction(data);
     } catch (err) {
       setError(String(err));
     }

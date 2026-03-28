@@ -72,6 +72,11 @@ async fn handle_incoming(app: &AppHandle, msg: IncomingMessage) {
     let state = app.state::<AuctionState>();
     let Ok(mut data) = state.0.lock() else { return };
 
+    // Only accept bids while the auction is running
+    if data.status != crate::state::AuctionStatus::Running {
+        return;
+    }
+
     // Filter channel_points bids by configured reward_id
     if source == BidSource::ChannelPoints {
         if let Some(ref required_id) = data.config.reward_id {
@@ -116,10 +121,32 @@ async fn handle_incoming(app: &AppHandle, msg: IncomingMessage) {
         BidStatus::Approved
     };
 
-    app.emit("bid:new", bid.clone()).ok();
+    // Snipe protection: extend timer if bid arrives near the end
+    let snipe_secs = data.config.snipe_protection_seconds;
+    let timer_extended = if snipe_secs > 0
+        && data.status == crate::state::AuctionStatus::Running
+        && data.timer_left_seconds < snipe_secs
+    {
+        data.timer_left_seconds = snipe_secs;
+        Some(snipe_secs)
+    } else {
+        None
+    };
+
+    app.emit("bid:new", serde_json::json!({ "auction_id": &data.id, "bid": &bid })).ok();
+    if let Some(secs) = timer_extended {
+        app.emit("timer:tick", serde_json::json!({ "seconds_left": secs })).ok();
+    }
     data.bids.push(bid);
 
-    let msg = serde_json::json!({ "type": "overlay:state", "data": data.clone() });
+    let overlay_msg = serde_json::json!({ "type": "overlay:state", "data": data.clone() });
     drop(data);
-    write_to_server(app, &msg.to_string());
+    write_to_server(app, &overlay_msg.to_string());
+    if let Some(secs) = timer_extended {
+        let tick_msg = serde_json::json!({
+            "type": "timer:tick",
+            "data": { "seconds_left": secs }
+        });
+        write_to_server(app, &tick_msg.to_string());
+    }
 }

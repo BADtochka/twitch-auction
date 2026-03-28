@@ -86,8 +86,8 @@ pub async fn start_auction(
     config: AuctionConfig,
     app: AppHandle,
     state: State<'_, AuctionState>,
-) -> Result<(), String> {
-    let auction_id = {
+) -> Result<AuctionData, String> {
+    let (auction_id, snapshot) = {
         let mut data = state.0.lock().map_err(|e| e.to_string())?;
         let show_after = data.config.widgets_show_after_finished.clone();
         data.config = config;
@@ -96,11 +96,13 @@ pub async fn start_auction(
         data.status = AuctionStatus::Running;
         data.bids.clear();
         data.winner_id = None;
+        data.started_at = Some(crate::state::chrono_now());
         data.id = uuid::Uuid::new_v4().to_string();
         let id = data.id.clone();
-        app.emit("auction:started", data.clone()).ok();
+        let snapshot = data.clone();
+        app.emit("auction:started", snapshot.clone()).ok();
         push_overlay_state(&app, &data);
-        id
+        (id, snapshot)
     };
 
     let app_clone = app.clone();
@@ -125,7 +127,7 @@ pub async fn start_auction(
 
             let tick_msg = serde_json::json!({
                 "type": "timer:tick",
-                "data": { "seconds_left": timer_left }
+                "data": { "seconds_left": timer_left, "status": "running" }
             });
             write_to_server(&app_clone, &tick_msg.to_string());
 
@@ -135,7 +137,7 @@ pub async fn start_auction(
         }
     });
 
-    Ok(())
+    Ok(snapshot)
 }
 
 #[tauri::command]
@@ -264,9 +266,28 @@ pub async fn add_manual_bid(
     } else {
         BidStatus::Approved
     };
-    app.emit("bid:new", bid.clone()).ok();
+    // Snipe protection: extend timer if bid arrives near the end
+    let snipe_secs = data.config.snipe_protection_seconds;
+    let timer_extended = if snipe_secs > 0 && data.timer_left_seconds < snipe_secs {
+        data.timer_left_seconds = snipe_secs;
+        Some(snipe_secs)
+    } else {
+        None
+    };
+
+    app.emit("bid:new", serde_json::json!({ "auction_id": &data.id, "bid": &bid })).ok();
+    if let Some(secs) = timer_extended {
+        app.emit("timer:tick", serde_json::json!({ "seconds_left": secs })).ok();
+    }
     data.bids.push(bid);
     push_overlay_state(&app, &data);
+    if let Some(secs) = timer_extended {
+        let tick_msg = serde_json::json!({
+            "type": "timer:tick",
+            "data": { "seconds_left": secs, "status": "running" }
+        });
+        write_to_server(&app, &tick_msg.to_string());
+    }
     Ok(())
 }
 

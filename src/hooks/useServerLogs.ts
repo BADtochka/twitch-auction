@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { env } from '../env';
 
-const SERVER_PORT = import.meta.env.VITE_SERVER_PORT ?? '3000';
+const SERVER_PORT = env.VITE_SERVER_PORT;
 const LOGS_URL = `http://localhost:${SERVER_PORT}/debug/logs`;
 
 export interface LogEntry {
